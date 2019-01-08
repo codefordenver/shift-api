@@ -7,3 +7,13 @@
 ### install golang dependencies
 
 - `dep ensure` 
+
+### building code
+
+- `make`
+
+### local dev
+
+- `npm install -g aws-sam-local`
+
+- `sam local start-api`
