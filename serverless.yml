@@ -1,0 +1,23 @@
+service: nikki-api-dev
+
+package:
+  exclude:
+    - node_modeules
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: us-east-2
+  timeout: 20
+  versionFunctions: false
+  memorySize: 512
+
+functions:
+
+  list:
+    handler: handler.listDatasets
+    events:
+      - http:
+          path: shiftapi/list
+          method: get
+          cors: true
