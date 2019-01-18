@@ -1,0 +1,13 @@
+module.export = function(sequelize, DataTypes) {
+    var Model = sequelize.define('model', {
+        geoid: {
+            type: DataTypes.STRING,
+            field: 'geoid10'
+        },
+        ttlpop: {
+            type:DataTypes.INTEGER,
+            field: 'b01001_001e'
+        }
+    });
+    return model;
+};
