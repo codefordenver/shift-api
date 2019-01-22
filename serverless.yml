@@ -53,17 +53,11 @@ package:
    - ./bin/**
 
 functions:
-  hello:
-    handler: bin/hello
+  api:
+    handler: bin/api
     events:
       - http:
-          path: hello
-          method: get
-  world:
-    handler: bin/world
-    events:
-      - http:
-          path: world
+          path: api
           method: get
 
 #    The following are a few example events you can configure
@@ -91,7 +85,7 @@ functions:
 #            detail:
 #              state:
 #                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cloudwatchLog: '/aws/lambda/api'
 #      - cognitoUserPool:
 #          pool: MyUserPool
 #          trigger: PreSignUp

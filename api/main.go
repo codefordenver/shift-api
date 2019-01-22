@@ -29,7 +29,8 @@ func main() {
 
 	var geo string
 	var b01001 int
-	err = db.QueryRow("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016 WHERE geoid10='08001'").Scan(&geo, &b01001)
+	row := db.QueryRow("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016 WHERE geoid10='08001'")
+	err = row.Scan(&geo, &b01001)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

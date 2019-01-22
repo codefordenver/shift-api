@@ -2,24 +2,19 @@
 
 
 [[projects]]
-  digest = "1:1c29e45ea5c6fa7e9159bfed0f5b31f10030f536ebc7f87615b93ff5f20c6dfe"
-  name = "github.com/aws/aws-lambda-go"
+  digest = "1:29145d7af4adafd72a79df5e41456ac9e232d5a28c1cd4dacf3ff008a217fc10"
+  name = "github.com/lib/pq"
   packages = [
-    "events",
-    "lambda",
-    "lambda/messages",
-    "lambdacontext",
+    ".",
+    "oid",
   ]
   pruneopts = ""
-  revision = "928161204cad89472f9e6b5dd49ce16bc91230de"
-  version = "v1.8.1"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/aws/aws-lambda-go/events",
-    "github.com/aws/aws-lambda-go/lambda",
-  ]
+  input-imports = ["github.com/lib/pq"]
   solver-name = "gps-cdcl"
   solver-version = 1
