@@ -3,6 +3,7 @@
 ### dependencies
 - [install golang](https://golang.org/doc/install)
 - [install dep](https://github.com/golang/dep)
+- [install reflex](https://github.com/cespare/reflex)
 
 ### install golang dependencies
 

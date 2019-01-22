@@ -12,3 +12,6 @@ deploy: clean build
 
 local:
 	sam local start-api
+
+dev:
+	reflex -c reflex.conf
