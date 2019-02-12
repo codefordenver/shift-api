@@ -1,15 +1,15 @@
 AWSTemplateFormatVersion : '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: SHIFT-API
+Description: A hello world application.
 Resources:
-  APIFunction:
+  HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: bin/api
+      Handler: bin/world
       Runtime: go1.x
       Events:
         Vote:
           Type: Api
           Properties:
-            Path: /
+            Path: /listdataset
             Method: get
