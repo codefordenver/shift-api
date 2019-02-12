@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'sam-app
+
+  Sample SAM Template for sam-app
+
+  '
+Globals:
+  Function:
+    Timeout: 5
+Outputs:
+  HelloWorldAPI:
+    Description: API Gateway endpoint URL for Prod environment for First Function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  RegisterFunction:
+    Description: First Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - RegisterFunction
+      - Arn
+  RegisterFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - RegisterFunctionRole
+      - Arn
+Resources:
+  RegisterFunction:
+    Properties:
+      CodeUri: s3://warm-cookies-sms-app/ce313016a965d3d4137e502f527a5764
+      Environment:
+        Variables:
+          WARMCOOKIES_FIRESTORE_COLLECTION: '!Sub ''${WARMCOOKIES_FIRESTORE_COLLECTION}'''
+          WARMCOOKIES_TWILIO_SID: '!Sub ''${WARMCOOKIES_TWILIO_SID}'''
+          WARMCOOKIES_TWILIO_TOKEN: '!Sub ''${WARMCOOKIES_TWILIO_TOKEN}'''
+      Events:
+        CatchAll:
+          Properties:
+            Method: POST
+            Path: /register
+          Type: Api
+      Handler: register
+      Runtime: go1.x
+      Tracing: Active
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

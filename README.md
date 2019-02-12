@@ -1,20 +1,9 @@
-# shift-api
+# SHIFT_API
 
-### dependencies
-- [install golang](https://golang.org/doc/install)
-- [install dep](https://github.com/golang/dep)
-- [install reflex](https://github.com/cespare/reflex)
+## DEVELOPMENT
 
-### install golang dependencies
+#### Starts local server API
+- `make local`
 
-- `dep ensure` 
-
-### building code
-
-- `make`
-
-### local dev
-
-- `npm install -g aws-sam-local`
-
-- `sam local start-api`
+#### Fetches dependencies and starts file watcher (hot-reload) 
+- `make dev`
