@@ -15,6 +15,7 @@ jobs:
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
       - run: make deps
+      - run: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
 
       - save_cache: # Store cache in the /go/pkg directory
           key: v1-pkg-cache
