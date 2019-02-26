@@ -14,12 +14,6 @@ jobs:
       # we've added it here for the sake of explanation.
       - run: make deps
 
-      - run:
-          name: Run unit tests
-          environment: # environment variables for the database url and path to migration files
-          command: |
-            make test
-
       - save_cache: # Store cache in the /go/pkg directory
           key: v1-pkg-cache
           paths:
