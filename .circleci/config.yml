@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: circleci/golang:1.11
     environment:
-      GO111MODULE: _on
+      GO111MODULE: "on"
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
     working_directory: /go/src/github.com/codefordenver/shift-api
