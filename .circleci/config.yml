@@ -4,6 +4,7 @@ jobs:
     machine: true
     environment:
       GO111MODULE: "on"
+      GOPATH: "/home/circleci/go"
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
     working_directory: ~/go/src/github.com/codefordenver
@@ -13,13 +14,11 @@ jobs:
 
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
-      - run: pwd
-      - run: ls
-#      - run: make deps
-#      - run: ./ci/scripts/install-linuxbrew.sh
-#      - run: brew tap aws/tap
-#      - run: brew update
-#      - run: brew install aws-sam-cli
+      - run: make deps
+      - run: ./ci/scripts/install-linuxbrew.sh
+      - run: brew tap aws/tap
+      - run: brew update
+      - run: brew install aws-sam-cli
 
 #      - save_cache: # Store cache in the /go/pkg directory
 #          key: v1-pkg-cache
