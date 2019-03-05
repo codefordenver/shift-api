@@ -1,7 +1,8 @@
 version: 2
 jobs:
   build:
-    machine: true ###do we want machine still?
+    #do we want machine still?
+    machine: true
       -image: circleci/golang:1.8
       environment:
         GO111MODULE: "on"
