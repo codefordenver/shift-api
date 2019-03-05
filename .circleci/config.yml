@@ -4,7 +4,6 @@ jobs:
     #machine: true ###do we want machine still?
     docker:
       -image: circleci/golang:1.8
-      -image: circleci/postgres:9.6-alpine
       environment:
         GO111MODULE: "on"
         GOPATH: "/home/circleci/go"
