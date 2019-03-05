@@ -15,8 +15,9 @@ jobs:
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
       - run: make deps
-      - run: echo y | sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+      - run: ./ci/scripts/install-linuxbrew.sh
       - run: brew tap aws/tap
+      - run: brew update
       - run: brew install aws-sam-cli
 
       - save_cache: # Store cache in the /go/pkg directory
