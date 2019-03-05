@@ -3,7 +3,6 @@ jobs:
   build:
     #do we want machine still?
     machine: true
-      -image: circleci/golang:1.8
       environment:
         GO111MODULE: "on"
         GOPATH: "/home/circleci/go"
