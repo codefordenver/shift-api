@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.11.5
     environment:
       GO111MODULE: "on"
 
@@ -16,6 +16,8 @@ jobs:
       # we've added it here for the sake of explanation.
       - run: make deps
       - run: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+      - run: brew tap aws/tap
+      - run: brew install aws-sam-cli
 
       - save_cache: # Store cache in the /go/pkg directory
           key: v1-pkg-cache
