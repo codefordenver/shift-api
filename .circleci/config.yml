@@ -1,10 +1,8 @@
 version: 2
 jobs:
   build:
-    #machine: true ###do we want machine still?
-    docker:
+    machine: true ###do we want machine still?
       -image: circleci/golang:1.8
-      
       environment:
         GO111MODULE: "on"
         GOPATH: "/home/circleci/go"
