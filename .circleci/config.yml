@@ -6,7 +6,7 @@ jobs:
       GO111MODULE: "on"
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
-    working_directory: /go/src/github.com/codefordenver/shift-api
+#    working_directory: /go/src/github.com/codefordenver/shift-api
 
     steps: # steps that comprise the `build` job
       - checkout # check out source code to working directory
