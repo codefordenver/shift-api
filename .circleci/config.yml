@@ -15,7 +15,7 @@ jobs:
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
       - run: make deps
-      - run: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+      - run: echo y | sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
       - run: brew tap aws/tap
       - run: brew install aws-sam-cli
 
