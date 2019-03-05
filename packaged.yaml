@@ -8,38 +8,36 @@ Globals:
   Function:
     Timeout: 5
 Outputs:
-  HelloWorldAPI:
-    Description: API Gateway endpoint URL for Prod environment for First Function
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
-  RegisterFunction:
-    Description: First Lambda Function ARN
+  ApiFunctions:
+    Description: SHIFT-API for interacting with Open Data
     Value:
       Fn::GetAtt:
-      - RegisterFunction
+      - ApiFunctions
       - Arn
-  RegisterFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
+  ApiFunctionsIamRole:
+    Description: Implicit IAM Role created for Shift API function
     Value:
       Fn::GetAtt:
-      - RegisterFunctionRole
+      - ApiFunctionsRole
       - Arn
+  ShiftAPIServerlessFunctions:
+    Description: API Gateway endpoint URL for Prod environment
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/
 Resources:
-  RegisterFunction:
+  ApiFunctions:
     Properties:
-      CodeUri: s3://warm-cookies-sms-app/ce313016a965d3d4137e502f527a5764
+      CodeUri: s3://codefordenver/9a23ef7057b84322a482f33aac2fc3c7
       Environment:
         Variables:
-          WARMCOOKIES_FIRESTORE_COLLECTION: '!Sub ''${WARMCOOKIES_FIRESTORE_COLLECTION}'''
-          WARMCOOKIES_TWILIO_SID: '!Sub ''${WARMCOOKIES_TWILIO_SID}'''
-          WARMCOOKIES_TWILIO_TOKEN: '!Sub ''${WARMCOOKIES_TWILIO_TOKEN}'''
+          PARAM1: foobar
       Events:
         CatchAll:
           Properties:
-            Method: POST
-            Path: /register
+            Method: GET
+            Path: /api
           Type: Api
-      Handler: register
+      Handler: api
       Runtime: go1.x
       Tracing: Active
     Type: AWS::Serverless::Function
