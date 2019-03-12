@@ -11,6 +11,7 @@ clean:
 .PHONY: build
 build:
 	GOOS=linux GOARCH=amd64 go build -o api/api ./api
+	GOOS=linux GOARCH=amd64 go build -o census/census ./census
 
 .PHONY: local
 local:
@@ -24,10 +25,20 @@ dev:
 test:
 	go test -v ./api
 
+.PHONY: package
+package:
+	sam package \
+        --template-file template.yaml \
+        --output-template-file packaged.yaml \
+        --s3-bucket codefordenver
+
 .PHONY: deploy
 deploy:
 	sam deploy \
         --template-file packaged.yaml \
         --stack-name shift-api-serverless-app-stack \
         --capabilities CAPABILITY_IAM \
-        --region us-west-2
+        --region us-east-2
+
+validate-circleci:
+	circleci config validate
