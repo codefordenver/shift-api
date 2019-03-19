@@ -1,12 +1,12 @@
-package geography
+package main
 
 import (
-"database/sql"
-"encoding/json"
-"fmt"
-"github.com/aws/aws-lambda-go/events"
-"github.com/aws/aws-lambda-go/lambda"
-_ "github.com/lib/pq"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -28,7 +28,6 @@ type data struct {
 type Response events.APIGatewayProxyResponse
 
 func Handler(req events.APIGatewayProxyRequest) (Response, error) {
-	fmt.Println(req.PathParameters)
 	fmt.Println(req.QueryStringParameters)
 	headers := map[string]string{
 		"Content-Type": "application/json",
@@ -44,7 +43,13 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	output := data{}
 
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.tract_state_b01001_2016")
+	geounit := req.PathParameters["geounit"]
+
+	year := req.PathParameters["year"]
+
+	tableStr := "geography." + geounit + "_state_geography_" + year
+
+	rows, err := db.Query("SELECT geoid10, b01001_001e FROM" + tableStr)
 	defer rows.Close()
 	if err != nil {
 		return Response{StatusCode: 500}, err
@@ -71,4 +76,3 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 func main() {
 	lambda.Start(Handler)
 }
-
