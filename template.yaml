@@ -11,6 +11,27 @@ Globals:
     Timeout: 5
 
 Resources:
+  GeographyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: geography/
+      Handler: geography
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /geography/{geounit}
+            Method: GET
+            Request:
+              Parameters:
+                Paths:
+                  geounit: true
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          PARAM1: "foobar"
+          
   ApiFunctions:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -27,6 +48,7 @@ Resources:
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           PARAM1: "foobar"
+
 
 Outputs:
   ShiftAPIServerlessFunctions:

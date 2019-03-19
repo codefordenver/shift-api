@@ -28,6 +28,9 @@ type data struct {
 type Response events.APIGatewayProxyResponse
 
 func Handler(req events.APIGatewayProxyRequest) (Response, error) {
+	fmt.Println(req.Path)
+	fmt.Println(req.PathParameters)
+	fmt.Println(req.QueryStringParameters)
 	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
@@ -42,7 +45,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	output := data{}
 
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016")
+	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.tract_state_b01001_2016")
 	defer rows.Close()
 	if err != nil {
 		return Response{StatusCode: 500}, err
