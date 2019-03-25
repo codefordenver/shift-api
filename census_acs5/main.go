@@ -42,7 +42,14 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	output := data{}
 
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016")
+	subject := req.PathParameters["subject"] // need to know what subject is
+	geounit := req.PathParameters["geounit"]
+	year := req.PathParameters["year"]
+
+	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
+
+	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
+	rows, err := db.Query("SELECT geoid10, b01001_001e FROM" + tableString)
 
 	defer rows.Close()
 	if err != nil {
