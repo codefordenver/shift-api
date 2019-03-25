@@ -12,6 +12,7 @@ clean:
 build:
 	GOOS=linux GOARCH=amd64 go build -o api/api ./api
 	GOOS=linux GOARCH=amd64 go build -o census/census ./census
+	GOOS=linux GOARCH=amd64 go build -o census_acs5/census_acs5 ./census_acs5
 
 .PHONY: local
 local:
