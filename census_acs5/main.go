@@ -46,10 +46,16 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	geounit := req.PathParameters["geounit"]
 	year := req.PathParameters["year"]
 
+
+	// also need some form of strong params
+	// need path params with geoid and b01001
+	// geoid := req.PathParameters["geoid10"] // are these path params? or something else
+	// fields := req.PathParameters["fields"]
+
 	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
 
 	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM" + tableString)
+	rows, err := db.Query("SELECT" +  geoid10 + ", " + fields + " FROM " + tableString)
 
 	defer rows.Close()
 	if err != nil {
