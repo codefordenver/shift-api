@@ -44,8 +44,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	output := data{}
 
 	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016")
-//	rows, err := db.Query("select distinct(tablename) from pg_table_def where schemaname = 'public';") //for the tablenames
-
+  //rows, err := db.Query("select distinct(tablename) from pg_table_def where schemaname = 'public';") //for the tablenames
 
 	defer rows.Close()
 	if err != nil {
