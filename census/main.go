@@ -44,6 +44,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	output := data{}
 
 	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016")
+
 	defer rows.Close()
 	if err != nil {
 		return Response{StatusCode: 500}, err
