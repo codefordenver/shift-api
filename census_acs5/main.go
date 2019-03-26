@@ -45,12 +45,19 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	subject := req.PathParameters["subject"] // need to know what subject is
 	geounit := req.PathParameters["geounit"]
 	year := req.PathParameters["year"]
-
-
 	// also need some form of strong params
-	// need path params with geoid and b01001
 	// geoid := req.PathParameters["geoid10"] // request params
 	// fields := req.PathParameters["fields"]
+	// query := req.URL.Query()
+	// fmt.Println(req.URL.String())
+
+	q, err := url.ParseQuery(req.Body)
+	if err != nil {
+		return Response{StatusCode: 400, Headers: headers}, errors.Wrap(err, "Bad input")
+	}
+
+	geoid10 := q.Get("geoid10")
+	fields := q.Get("fields")
 
 	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
 
