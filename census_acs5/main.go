@@ -49,7 +49,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	// also need some form of strong params
 	// need path params with geoid and b01001
-	// geoid := req.PathParameters["geoid10"] // are these path params? or something else
+	// geoid := req.PathParameters["geoid10"] // request params
 	// fields := req.PathParameters["fields"]
 
 	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
