@@ -14,7 +14,7 @@ build:
 
 .PHONY: local
 local:
-	sam local start-api
+	sam local start-api --env-vars config.json 
 
 .PHONY: dev
 dev:
