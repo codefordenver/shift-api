@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -43,13 +44,34 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	output := data{}
 
-	geounit := req.PathParameters["geounit"]
+	geoUnit := req.PathParameters["geounit"]
+
+	geoParam := ""
 
 	year := req.PathParameters["year"]
 
-	tableStr := "geography." + geounit + "_state_geography_" + year
+	if geoUnit == "nbhd" {
+		geoParam = "nhid"
+	} else if geoUnit == "county" || geoUnit == "tract" {
+		geoParam = "geoid10"
+	} else {
+		return Response{StatusCode: 422}, errors.New("invalid geographical unit: " + geoUnit)
+	}
 
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM" + tableStr)
+	if !(year == "2000" || year == "2010" || year == "2016") {
+		return Response{StatusCode: 422}, errors.New("invalid year: " + year)
+	}
+
+	geoParamValue := req.QueryStringParameters[geoParam]
+
+	tableName := "geography." + geoUnit + "_state_geography_" + year
+
+	query := fmt.Sprintf("SELECT %s, geometry FROM %s WHERE %s = '%s'", geoParam, tableName, geoParam, geoParamValue)
+
+	fmt.Println(query)
+
+	rows, err := db.Query(query)
+
 	defer rows.Close()
 	if err != nil {
 		return Response{StatusCode: 500}, err
