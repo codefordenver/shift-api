@@ -22,3 +22,5 @@ vendor
 
 .env
 api/api
+
+config.json
