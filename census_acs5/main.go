@@ -17,7 +17,7 @@ const (
 )
 
 type item struct {
-	Geoid10 string
+	Geoid10 string			//make this dynamic 04.08.19?
 	Field   int
 }
 
@@ -42,14 +42,15 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	output := data{}
 
-	subject := req.PathParameters["subject"] // need to know what subject is
+	subject := req.PathParameters["subject"]
 	geounit := req.PathParameters["geounit"]
 	year := req.PathParameters["year"]
-	// also need some form of strong params
+	// also need some form of strong params?
 	// geoid := req.PathParameters["geoid10"] // request params
 	// fields := req.PathParameters["fields"]
 	// query := req.URL.Query()
-	// fmt.Println(req.URL.String())
+	// // fmt.Println(req.URL.String())
+	//e.g. api.shiftresearchlab.org/census/acs5/{subject}/{geounit}/{year}?geoid10='08001'&fields=b01001_001e,b01001_002e
 
 	q, err := url.ParseQuery(req.Body)
 	if err != nil {
@@ -61,8 +62,8 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
 
-	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
 	rows, err := db.Query("SELECT" +  geoid10 + ", " + fields + " FROM " + tableString)
+	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
 
 	defer rows.Close()
 	if err != nil {
