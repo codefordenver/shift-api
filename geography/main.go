@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/lib/pq"
+	"regexp"
 )
 
 const (
@@ -17,19 +18,9 @@ const (
 	DB_HOST     = "demodb.catj63cigq6x.us-east-2.rds.amazonaws.com"
 )
 
-type item struct {
-	Geoid10 string
-	Field   int
-}
-
-type data struct {
-	Items []item
-}
-
 type Response events.APIGatewayProxyResponse
 
 func Handler(req events.APIGatewayProxyRequest) (Response, error) {
-	fmt.Println(req.QueryStringParameters)
 	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
@@ -42,7 +33,18 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	}
 	defer db.Close()
 
-	output := data{}
+	//rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'geography'")
+	//
+	//for rows.Next() {
+	//	tableName := ""
+	//	rows.Scan(&tableName)
+	//	fields := strings.Split(tableName, "_")
+	//	fmt.Println(fields)
+	//}
+	//
+	//defer rows.Close()
+
+	var output interface{}
 
 	geoUnit := req.PathParameters["geounit"]
 
@@ -50,25 +52,22 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	year := req.PathParameters["year"]
 
+	if matches, _ := regexp.MatchString("[\\d]{3}0", year); !matches {
+		return Response{StatusCode: 422}, errors.New("invalid year: " + year)
+	}
 	if geoUnit == "nbhd" {
 		geoParam = "nhid"
-	} else if geoUnit == "county" || geoUnit == "tract" {
-		geoParam = "geoid10"
+	} else if geoUnit == "county" || geoUnit == "tract" || geoUnit == "block"{
+		geoParam = "geoid" + year[len(year) - 2:]
 	} else {
 		return Response{StatusCode: 422}, errors.New("invalid geographical unit: " + geoUnit)
-	}
-
-	if !(year == "2000" || year == "2010" || year == "2016") {
-		return Response{StatusCode: 422}, errors.New("invalid year: " + year)
 	}
 
 	geoParamValue := req.QueryStringParameters[geoParam]
 
 	tableName := "geography." + geoUnit + "_state_geography_" + year
 
-	query := fmt.Sprintf("SELECT %s, geometry FROM %s WHERE %s = '%s'", geoParam, tableName, geoParam, geoParamValue)
-
-	fmt.Println(query)
+	query := fmt.Sprintf("SELECT json_build_object('geometry', ST_AsGeoJSON(geometry)::json, 'properties', json_build_object('" + geoParam + "', " + geoParam + ")) FROM %s WHERE %s = '%s'", tableName, geoParam, geoParamValue)
 
 	rows, err := db.Query(query)
 
@@ -78,15 +77,19 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	}
 
 	for rows.Next() {
-		line := item{}
-		err = rows.Scan(
-			&line.Geoid10,
-			&line.Field,
-		)
-		output.Items = append(output.Items, line)
+		var scannedRow []byte
+		err = rows.Scan(&scannedRow)
+		if err != nil {
+			return Response{StatusCode: 500}, err
+		}
+		err = json.Unmarshal(scannedRow, &output)
+		if err != nil {
+			return Response{StatusCode: 500}, err
+		}
 	}
 
 	jsonB, err := json.Marshal(output)
+
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
