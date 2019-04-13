@@ -29,7 +29,7 @@ export GO111MODULE=on
 ```
 
 #### Add a file to store your environment variables
-You need a `config.json` file.  You can copy the `config.example.json` file (`mv config.example.json config.json`) and add environment variables as we need more in the app. 
+You need a `config.json` file.  You can copy the `config.example.json` file (`cp config.example.json config.json`) and add environment variables as we need more in the app. 
 
 #### Optional:
 - [Docker desktop](https://www.docker.com/products/docker-desktop) for running Docker daemon
