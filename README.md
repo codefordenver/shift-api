@@ -1,8 +1,8 @@
 # SHIFT_API
 
 ## Development
-
-#### Make sure Docker daemon is running
+ 
+[With Docker daemon is running](https://www.docker.com/get-started)
 
 #### Start local server API
 - `make local`
