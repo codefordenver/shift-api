@@ -47,7 +47,6 @@ Resources:
         Variables:
           PARAM1: "foobar"
 
-
 Outputs:
   ShiftAPIServerlessFunctions:
     Description: "API Gateway endpoint URL for Prod environment"

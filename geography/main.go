@@ -44,7 +44,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	//
 	//defer rows.Close()
 
-	var output interface{}
+	var output []interface{}
 
 	geoUnit := req.PathParameters["geounit"]
 
@@ -78,14 +78,16 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	for rows.Next() {
 		var scannedRow []byte
+		var scannedJSON interface{}
 		err = rows.Scan(&scannedRow)
 		if err != nil {
 			return Response{StatusCode: 500}, err
 		}
-		err = json.Unmarshal(scannedRow, &output)
+		err = json.Unmarshal(scannedRow, &scannedJSON)
 		if err != nil {
 			return Response{StatusCode: 500}, err
 		}
+		output = append(output, scannedJSON)
 	}
 
 	jsonB, err := json.Marshal(output)
