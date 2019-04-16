@@ -10,6 +10,7 @@ jobs:
       LANG: en_US.UTF-8
       LANGUAGE: en_US.UTF-8
       LC_ALL: en_US.UTF-8
+      LC_CTYPE: en_US.UTF-8
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
     working_directory: ~/go/src/github.com/codefordenver
