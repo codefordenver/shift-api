@@ -1,10 +1,12 @@
 version: 2
 jobs:
   build:
-    machine: true
+    docker:
+      - image: circleci/golang:1.11
     environment:
       GO111MODULE: "on"
       GOPATH: "/home/circleci/go"
+      USER: circleci
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
     working_directory: ~/go/src/github.com/codefordenver
@@ -16,6 +18,7 @@ jobs:
       # we've added it here for the sake of explanation.
       - run: make deps
       - run: ./ci/scripts/install-linuxbrew.sh
+      - run: echo 'export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"' >> $BASH_ENV 
       - run: brew tap aws/tap
       - run: brew update
       - run: brew install aws-sam-cli
