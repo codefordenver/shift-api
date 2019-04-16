@@ -1,8 +1,8 @@
 # SHIFT_API
 
 ## Development
-
-#### Make sure Docker daemon is running
+ 
+[With Docker daemon is running](https://www.docker.com/get-started)
 
 #### Start local server API
 - `make local`
@@ -27,6 +27,9 @@ export GOPATH="${HOME}/go"
 export PATH="$GOPATH/bin:$PATH"
 export GO111MODULE=on
 ```
+
+#### Add a file to store your environment variables
+You need a `config.json` file.  You can copy the `config.example.json` file (`cp config.example.json config.json`) and add environment variables as we need more in the app. 
 
 #### Optional:
 - [Docker desktop](https://www.docker.com/products/docker-desktop) for running Docker daemon
