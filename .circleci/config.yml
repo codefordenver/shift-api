@@ -20,7 +20,7 @@ jobs:
 
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
-      - run: apt-get install build-essential
+      - run: sudo apt-get install build-essential
       - run: make deps
       - run: ./ci/scripts/install-linuxbrew.sh
       - run: echo 'export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"' >> $BASH_ENV 
