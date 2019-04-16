@@ -18,6 +18,7 @@ jobs:
       # we've added it here for the sake of explanation.
       - run: make deps
       - run: ./ci/scripts/install-linuxbrew.sh
+      - run: export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
       - run: brew tap aws/tap
       - run: brew update
       - run: brew install aws-sam-cli
