@@ -6,6 +6,7 @@ jobs:
     environment:
       GO111MODULE: "on"
       GOPATH: "/home/circleci/go"
+      USER: circleci
 
     # directory where steps are run. Path must conform to the Go Workspace requirements
     working_directory: ~/go/src/github.com/codefordenver
