@@ -60,40 +60,49 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	query := fmt.Sprintf("SELECT %[1]s, json_build_object('geography', ST_AsGeoJSON(ST_SIMPLIFYPRESERVETOPOLOGY(ST_COLLECT(geometry), .0001))::json) FROM %[2]s WHERE %[1]s = ANY($1) GROUP BY %[1]s", geoParam, tableName)
 
 	rows, err := db.Query(query, pq.Array(geoParamValues))
-	defer rows.Close()
-
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
+	defer rows.Close()
 
 	//Generate FeatureCollection from GeometryCollection
 	returnJSON := gabs.New()
 
-	returnJSON.Set("FeatureCollection", "type")
-	returnJSON.Array("features")
+	if _, err = returnJSON.Set("FeatureCollection", "type"); err != nil {
+		return Response{StatusCode: 500}, err
+	}
+	if _, err = returnJSON.Array("features"); err != nil {
+		return Response{StatusCode: 500}, err
+	}
 
 	for rows.Next() {
 		var scannedID string
 		var scannedGeometry []byte
-		err = rows.Scan(&scannedID, &scannedGeometry)
-		if err != nil {
+		if err = rows.Scan(&scannedID, &scannedGeometry); err != nil {
 			return Response{StatusCode: 500}, err
 		}
 
 		parsedJSON, err := gabs.ParseJSON(scannedGeometry)
+		if err != nil {
+			return Response{StatusCode: 500}, err
+		}
 
 		children, _ := parsedJSON.Path("geography.geometries").Children()
 
 		for _, child := range children {
 			featureJSON := gabs.New()
-			featureJSON.Set("Feature", "type")
-			featureJSON.Set(child.Data(), "geometry")
-			featureJSON.SetP(scannedID, "properties."+geoParam)
-			returnJSON.ArrayAppend(featureJSON.Data(), "features")
-		}
-
-		if err != nil {
-			return Response{StatusCode: 500}, err
+			if _, err = featureJSON.Set("Feature", "type"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if _, err = featureJSON.Set(child.Data(), "geometry"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if _, err = featureJSON.SetP(scannedID, "properties."+geoParam); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if err = returnJSON.ArrayAppend(featureJSON.Data(), "features"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
 		}
 	}
 
