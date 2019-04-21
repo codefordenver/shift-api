@@ -18,7 +18,7 @@ const (
 
 type item struct {
 	Geoid10 string			//make this dynamic 04.08.19?
-	Field   int
+	Fields int  					//scan  / numeric in golang ()   .scan function
 }
 
 type data struct {
@@ -52,17 +52,24 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	// // fmt.Println(req.URL.String())
 	//e.g. api.shiftresearchlab.org/census/acs5/{subject}/{geounit}/{year}?geoid10='08001'&fields=b01001_001e,b01001_002e
 
-	q, err := url.ParseQuery(req.Body)
-	if err != nil {
-		return Response{StatusCode: 400, Headers: headers}, errors.Wrap(err, "Bad input")
-	}
+//	q, err := url.ParseQuery(req.Body)	//
+	// if err != nil {
+	// 	return Response{StatusCode: 400, Headers: headers}, errors.Wrap(err, "Bad input")
+	// }
 
-	geoid10 := q.Get("geoid10")
-	fields := q.Get("fields")
 
-	tableString := "acs5." + geounit + "_" + subject + "_" + year	//double check format for subject
+	geoid10 := req.QueryStringParameters["geoid10"]
+	fields := req.QueryStringParameters["fields"]
 
-	rows, err := db.Query("SELECT" +  geoid10 + ", " + fields + " FROM " + tableString)
+	//get count
+	//var count int
+
+	fmt.Println(geoid10)
+	fmt.Println(fields)
+
+	tableString := "acs5." + geounit + "_state_" + subject + "_" + year	//double check format for subject
+
+	rows, err := db.Query("SELECT geoid10, " + fields + " FROM " + tableString " WHERE geoid10")
 	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
 
 	defer rows.Close()
@@ -72,10 +79,13 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	for rows.Next() {
 		line := item{}
-		err = rows.Scan(
-			&line.Geoid10,
-			&line.Field,
-		)
+		err = rows.Scan(&line.Geoid10)
+		err = rows.Scan(&line.Fields)
+		// for i := 0; i < count; i++ {					// use reg for
+		// 	var field int
+		// 	err = rows.Scan(&field)
+		// 	line.Fields = append(line.Fields, field)			///
+		// }
 		output.Items = append(output.Items, line)
 	}
 
