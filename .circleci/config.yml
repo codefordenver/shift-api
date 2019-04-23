@@ -31,8 +31,9 @@ jobs:
       - run: cd aws-sam-cli
       - run: sudo apt install curl
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      - run: python get-pip.py --user
-      - run: pip install --user -e .
+      - run: sudo python get-pip.py --user
+      - run: sudo apt-get install libffi-dev libssl-dev libpython2.7-dev
+      - run: sudo pip install --user -e .
 
 #      - save_cache: # Store cache in the /go/pkg directory
 #          key: v1-pkg-cache
