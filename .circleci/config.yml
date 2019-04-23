@@ -32,7 +32,6 @@ jobs:
       - run: python get-pip.py --user
       - run: sudo apt-get install libffi-dev libssl-dev libpython2.7-dev
       - run: git clone git@github.com:awslabs/aws-sam-cli.git
-      - run: cd aws-sam-cli
       - run: pip install --user -e aws-sam-cli/.
 
 #      - save_cache: # Store cache in the /go/pkg directory
