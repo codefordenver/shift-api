@@ -1,13 +1,16 @@
-package main  //Copy from census
+package main
 
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
-
+	"github.com/Jeffail/gabs"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
+	"regexp"
+	"strings"
 )
 
 const (
@@ -16,15 +19,6 @@ const (
 	DB_NAME     = "shift_public"
 	DB_HOST     = "demodb.catj63cigq6x.us-east-2.rds.amazonaws.com"
 )
-
-type item struct {
-	Geoid10 string
-	Field   int
-}
-
-type data struct {
-	Items []item
-}
 
 type Response events.APIGatewayProxyResponse
 
@@ -40,25 +34,80 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 		return Response{StatusCode: 500}, err
 	}
 	defer db.Close()
+	
+	geoUnit := req.PathParameters["geounit"]
 
-	output := data{}
+	geoParam := ""
 
-	rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016")  //candidate to change
-	defer rows.Close()
+	year := req.PathParameters["year"]
+
+	if matches, _ := regexp.MatchString("[\\d]{3}0", year); !matches {
+		return Response{StatusCode: 422}, errors.New("invalid year: " + year)
+	}
+	if geoUnit == "nbhd" {
+		geoParam = "nhid"
+	} else if geoUnit == "county" || geoUnit == "tract" || geoUnit == "block" {
+		geoParam = "geoid" + year[len(year)-2:]
+	} else {
+		return Response{StatusCode: 422}, errors.New("invalid geographical unit: " + geoUnit)
+	}
+
+	geoParamValues := strings.Split(req.QueryStringParameters[geoParam], ",")
+
+	tableName := "geography." + geoUnit + "_state_geography_" + year
+
+	//Query for geometries
+	query := fmt.Sprintf("SELECT %[1]s, json_build_object('geography', ST_AsGeoJSON(ST_SIMPLIFYPRESERVETOPOLOGY(ST_COLLECT(geometry), .0001))::json) FROM %[2]s WHERE %[1]s = ANY($1) GROUP BY %[1]s", geoParam, tableName)
+
+	rows, err := db.Query(query, pq.Array(geoParamValues))
 	if err != nil {
+		return Response{StatusCode: 500}, err
+	}
+	defer rows.Close()
+
+	//Generate FeatureCollection from GeometryCollection
+	returnJSON := gabs.New()
+
+	if _, err = returnJSON.Set("FeatureCollection", "type"); err != nil {
+		return Response{StatusCode: 500}, err
+	}
+	if _, err = returnJSON.Array("features"); err != nil {
 		return Response{StatusCode: 500}, err
 	}
 
 	for rows.Next() {
-		line := item{}
-		err = rows.Scan(
-			&line.Geoid10,       //candidate to change
-			&line.Field,         //candidate to change
-		)
-		output.Items = append(output.Items, line)
+		var scannedID string
+		var scannedGeometry []byte
+		if err = rows.Scan(&scannedID, &scannedGeometry); err != nil {
+			return Response{StatusCode: 500}, err
+		}
+
+		parsedJSON, err := gabs.ParseJSON(scannedGeometry)
+		if err != nil {
+			return Response{StatusCode: 500}, err
+		}
+
+		children, _ := parsedJSON.Path("geography.geometries").Children()
+
+		for _, child := range children {
+			featureJSON := gabs.New()
+			if _, err = featureJSON.Set("Feature", "type"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if _, err = featureJSON.Set(child.Data(), "geometry"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if _, err = featureJSON.SetP(scannedID, "properties."+geoParam); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+			if err = returnJSON.ArrayAppend(featureJSON.Data(), "features"); err != nil {
+				return Response{StatusCode: 500}, err
+			}
+		}
 	}
 
-	jsonB, err := json.Marshal(output)
+	jsonB, err := json.Marshal(returnJSON.Data())
+
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
