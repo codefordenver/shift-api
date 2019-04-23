@@ -3,7 +3,6 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.11
-      - image: circleci/python:3.6
     environment:
       GO111MODULE: "on"
       GOPATH: "/home/circleci/go"
