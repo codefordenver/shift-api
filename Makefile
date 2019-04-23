@@ -28,7 +28,7 @@ dev:
 test:
 	go test -v ./api
 	go test -v ./census_acs5
-  go test -v ./goegraphy
+	go test -v ./goegraphy
 
 .PHONY: package
 package:
