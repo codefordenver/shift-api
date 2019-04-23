@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"github.com/Jeffail/gabs"
 	"regexp"
 	"strconv"
 	"strings"
@@ -67,7 +69,7 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	geoParam := "geoid" + string([]byte(year)[2]) + "0"
 
-	geoParamValue := req.QueryStringParameters[geoParam]
+	geoParamValues := strings.Split(req.QueryStringParameters[geoParam], ",")
 
 	fields := req.QueryStringParameters["fields"]
 
@@ -81,9 +83,9 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 
 	fieldColumns := geoParam + ", " + fields
 
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = '%s'", fieldColumns, tableName, geoParam, geoParamValue)
-	
-	rows, err := db.Query(query)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = ANY($1)", fieldColumns, tableName, geoParam)
+
+	rows, err := db.Query(query, pq.Array(geoParamValues))
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
@@ -94,35 +96,39 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 		return Response{StatusCode: 500}, err
 	}
 
-	var output []Entry
+	var returnJSON []interface{}
+
 
 	for rows.Next() {
 		values := make([]interface{}, len(columns))
 		for i := range columns {
 			values[i] = new(sql.RawBytes)
 		}
-		err = rows.Scan(values...)
-		if err != nil {
+		if err = rows.Scan(values...); err != nil {
 			return Response{StatusCode: 500}, err
 		}
-		var row Entry
+		rowJSON := gabs.New()
 		for i, value := range values {
 			var val []byte
 			val = *value.(*sql.RawBytes)
 			if i == 0 {
-				row.Geoid = string(val)
+				if _, err = rowJSON.Set(string(val), geoParam); err != nil {
+					return Response{StatusCode: 500}, err
+				}
 			} else {
 				intValue, err := strconv.Atoi(string(val))
 				if err != nil {
 					return Response{StatusCode: 500}, err
 				}
-				row.Fields = append(row.Fields, Field{Field: columns[i], Value: intValue})
+				if _, err = rowJSON.Set(intValue, columns[i]); err != nil {
+					return Response{StatusCode: 500}, err
+				}
 			}
 		}
-		output = append(output, row)
+		returnJSON = append(returnJSON, rowJSON.Data())
 	}
 
-	jsonB, err := json.Marshal(output)
+	jsonB, err := json.Marshal(returnJSON)
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
