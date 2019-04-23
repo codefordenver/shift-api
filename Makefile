@@ -7,11 +7,11 @@ deps:
 .PHONY: clean
 clean:
 	rm -rf ./api/api
+	rm -rf ./census_acs5/census_acs5
 
 .PHONY: build
 build:
 	GOOS=linux GOARCH=amd64 go build -o api/api ./api
-	GOOS=linux GOARCH=amd64 go build -o census/census ./census
 	GOOS=linux GOARCH=amd64 go build -o census_acs5/census_acs5 ./census_acs5
 
 .PHONY: local
@@ -25,6 +25,7 @@ dev:
 .PHONY: test
 test:
 	go test -v ./api
+	go test -v ./census_acs5
 
 .PHONY: package
 package:

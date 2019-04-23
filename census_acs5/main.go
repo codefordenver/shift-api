@@ -3,10 +3,14 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/lib/pq"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -16,16 +20,17 @@ const (
 	DB_HOST     = "demodb.catj63cigq6x.us-east-2.rds.amazonaws.com"
 )
 
-type item struct {
-	Geoid10 string			//make this dynamic 04.08.19?
-	Fields int  					//scan  / numeric in golang ()   .scan function
-}
-
-type data struct {
-	Items []item
-}
-
 type Response events.APIGatewayProxyResponse
+
+type Entry struct {
+	Geoid  string
+	Fields []Field
+}
+
+type Field struct {
+	Field string
+	Value int
+}
 
 func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	headers := map[string]string{
@@ -40,53 +45,81 @@ func Handler(req events.APIGatewayProxyRequest) (Response, error) {
 	}
 	defer db.Close()
 
-	output := data{}
-
 	subject := req.PathParameters["subject"]
-	geounit := req.PathParameters["geounit"]
+
+	if matches, _ := regexp.MatchString("b[\\w]{5}", subject); !matches {
+		return Response{StatusCode: 422}, errors.New("invalid subject: " + subject)
+	}
+
+	fieldPattern := subject + "_[\\d]{3}[a-z]"
+
+	geoUnit := req.PathParameters["geounit"]
+
+	if !(geoUnit == "tract" || geoUnit == "county") {
+		return Response{StatusCode: 422}, errors.New("invalid geounit: " + geoUnit)
+	}
+
 	year := req.PathParameters["year"]
-	// also need some form of strong params?
-	// geoid := req.PathParameters["geoid10"] // request params
-	// fields := req.PathParameters["fields"]
-	// query := req.URL.Query()
-	// // fmt.Println(req.URL.String())
-	//e.g. api.shiftresearchlab.org/census/acs5/{subject}/{geounit}/{year}?geoid10='08001'&fields=b01001_001e,b01001_002e
 
-//	q, err := url.ParseQuery(req.Body)	//
-	// if err != nil {
-	// 	return Response{StatusCode: 400, Headers: headers}, errors.Wrap(err, "Bad input")
-	// }
+	if matches, _ := regexp.MatchString("[\\d]{4}", year); !matches {
+		return Response{StatusCode: 422}, errors.New("invalid year: " + year)
+	}
 
+	geoParam := "geoid" + string([]byte(year)[2]) + "0"
 
-	geoid10 := req.QueryStringParameters["geoid10"]
+	geoParamValue := req.QueryStringParameters[geoParam]
+
 	fields := req.QueryStringParameters["fields"]
 
-	//get count
-	//var count int
+	for _, field := range strings.Split(fields, ",") {
+		if matches, _ := regexp.MatchString(fieldPattern, field); !matches {
+			return Response{StatusCode: 422}, errors.New("invalid field: " + field)
+		}
+	}
 
-	fmt.Println(geoid10)
-	fmt.Println(fields)
+	tableName := "acs5." + geoUnit + "_state_" + subject + "_" + year
 
-	tableString := "acs5." + geounit + "_state_" + subject + "_" + year	//double check format for subject
+	fieldColumns := geoParam + ", " + fields
 
-	rows, err := db.Query("SELECT geoid10, " + fields + " FROM " + tableString " WHERE geoid10")
-	//rows, err := db.Query("SELECT geoid10, b01001_001e FROM acs5.county_state_b01001_2016") //original
-
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = '%s'", fieldColumns, tableName, geoParam, geoParamValue)
+	
+	rows, err := db.Query(query)
+	if err != nil {
+		return Response{StatusCode: 500}, err
+	}
 	defer rows.Close()
+
+	columns, err := rows.Columns()
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
 
+	var output []Entry
+
 	for rows.Next() {
-		line := item{}
-		err = rows.Scan(&line.Geoid10)
-		err = rows.Scan(&line.Fields)
-		// for i := 0; i < count; i++ {					// use reg for
-		// 	var field int
-		// 	err = rows.Scan(&field)
-		// 	line.Fields = append(line.Fields, field)			///
-		// }
-		output.Items = append(output.Items, line)
+		values := make([]interface{}, len(columns))
+		for i := range columns {
+			values[i] = new(sql.RawBytes)
+		}
+		err = rows.Scan(values...)
+		if err != nil {
+			return Response{StatusCode: 500}, err
+		}
+		var row Entry
+		for i, value := range values {
+			var val []byte
+			val = *value.(*sql.RawBytes)
+			if i == 0 {
+				row.Geoid = string(val)
+			} else {
+				intValue, err := strconv.Atoi(string(val))
+				if err != nil {
+					return Response{StatusCode: 500}, err
+				}
+				row.Fields = append(row.Fields, Field{Field: columns[i], Value: intValue})
+			}
+		}
+		output = append(output, row)
 	}
 
 	jsonB, err := json.Marshal(output)
