@@ -29,11 +29,11 @@ jobs:
       # - run: brew install aws-sam-cli
       - run: sudo apt install curl
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      - run: python get-pip.py --user
+      - run: sudo python get-pip.py
       - run: sudo apt-get install libffi-dev libssl-dev libpython2.7-dev
       - run: echo $PWD
       - run: git clone git@github.com:awslabs/aws-sam-cli.git
-      - run: sudo pip install --user -e aws-sam-cli/.
+      - run: pip install --user -e aws-sam-cli/.
 
 #      - save_cache: # Store cache in the /go/pkg directory
 #          key: v1-pkg-cache
