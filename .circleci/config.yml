@@ -24,9 +24,15 @@ jobs:
       - run: make deps
       - run: ./ci/scripts/install-linuxbrew.sh
       - run: echo 'export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"' >> $BASH_ENV 
-      - run: brew tap aws/tap
-      - run: brew update
-      - run: brew install aws-sam-cli
+      # - run: brew tap aws/tap
+      # - run: brew update
+      # - run: brew install aws-sam-cli
+      - run: git clone git@github.com:awslabs/aws-sam-cli.git
+      - run: cd aws-sam-cli
+      - run: sudo apt install curl
+      - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+      - run: python get-pip.py
+      - run: pip install --user -e .
 
 #      - save_cache: # Store cache in the /go/pkg directory
 #          key: v1-pkg-cache
