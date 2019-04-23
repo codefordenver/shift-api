@@ -22,5 +22,5 @@ vendor
 
 .env
 api/api
-
+geography/geography
 config.json

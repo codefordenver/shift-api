@@ -11,6 +11,25 @@ Globals:
     Timeout: 5
 
 Resources:
+  GeographyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: geography/
+      Handler: geography
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /geography/{geounit}/{year}
+            Method: GET
+            Request:
+              Parameters:
+                Paths:
+                  geounit: true
+                  year: true
+
   ApiFunctions:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:

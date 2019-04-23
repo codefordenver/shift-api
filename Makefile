@@ -7,10 +7,12 @@ deps:
 .PHONY: clean
 clean:
 	rm -rf ./api/api
+	rm -rf ./geography/geography
 
 .PHONY: build
 build:
 	GOOS=linux GOARCH=amd64 go build -o api/api ./api
+	GOOS=linux GOARCH=amd64 go build -o geography/geography ./geography
 
 .PHONY: local
 local:
@@ -23,6 +25,7 @@ dev:
 .PHONY: test
 test:
 	go test -v ./api
+	go test -v ./geography
 
 .PHONY: package
 package:
