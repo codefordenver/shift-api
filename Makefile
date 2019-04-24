@@ -8,7 +8,7 @@ deps:
 clean:
 	rm -rf ./api/api
 	rm -rf ./census_acs5/census_acs5
-  rm -rf ./geography/geography
+	rm -rf ./geography/geography
 
 .PHONY: build
 build:
