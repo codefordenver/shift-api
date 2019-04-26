@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: 'sam-app
 
   Sample SAM Template for sam-app
@@ -7,40 +8,35 @@ Description: 'sam-app
 Globals:
   Function:
     Timeout: 5
-Outputs:
-  HelloWorldAPI:
-    Description: API Gateway endpoint URL for Prod environment for First Function
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
-  RegisterFunction:
-    Description: First Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - RegisterFunction
-      - Arn
-  RegisterFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - RegisterFunctionRole
-      - Arn
 Resources:
-  RegisterFunction:
+  GeographyFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://warm-cookies-sms-app/ce313016a965d3d4137e502f527a5764
-      Environment:
-        Variables:
-          WARMCOOKIES_FIRESTORE_COLLECTION: '!Sub ''${WARMCOOKIES_FIRESTORE_COLLECTION}'''
-          WARMCOOKIES_TWILIO_SID: '!Sub ''${WARMCOOKIES_TWILIO_SID}'''
-          WARMCOOKIES_TWILIO_TOKEN: '!Sub ''${WARMCOOKIES_TWILIO_TOKEN}'''
-      Events:
-        CatchAll:
-          Properties:
-            Method: POST
-            Path: /register
-          Type: Api
-      Handler: register
+      CodeUri: s3://codefordenver/f60b0ece7871d474d035f17f7e6f9fb7
+      Handler: geography
       Runtime: go1.x
       Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /geography/{geounit}/{year}
+            Method: GET
+  CensusAcs5Function:
     Type: AWS::Serverless::Function
-Transform: AWS::Serverless-2016-10-31
+    Properties:
+      CodeUri: s3://codefordenver/05f7f664725fc6aef5a0d53833229563
+      Handler: census_acs5
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /census/acs5/{subject}/{geounit}/{year}
+            Method: GET
+Outputs:
+  ShiftAPIServerlessFunctions:
+    Description: API Gateway endpoint URL for Prod environment
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/

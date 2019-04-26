@@ -24,28 +24,6 @@ Resources:
           Properties:
             Path: /geography/{geounit}/{year}
             Method: GET
-            Request:
-              Parameters:
-                Paths:
-                  geounit: true
-                  year: true
-
-  ApiFunctions:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: api/
-      Handler: api
-      Runtime: go1.x
-      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
-      Events:
-        CatchAll:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /api
-            Method: GET
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-        Variables:
-          PARAM1: "foobar"
 
   CensusAcs5Function:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -60,22 +38,8 @@ Resources:
           Properties:
             Path: /census/acs5/{subject}/{geounit}/{year}  #?geoid10='08001'&fields=b01001_001e,b01001_002e
             Method: GET
-            Request:
-              Parameters:
-                Paths:
-                  subject: true
-                  geounit: true
-                  year: true
 
 Outputs:
   ShiftAPIServerlessFunctions:
     Description: "API Gateway endpoint URL for Prod environment"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/"
-
-  ApiFunctions:
-    Description: "SHIFT-API for interacting with Open Data"
-    Value: !GetAtt ApiFunctions.Arn
-
-  ApiFunctionsIamRole:
-    Description: "Implicit IAM Role created for Shift API function"
-    Value: !GetAtt ApiFunctionsRole.Arn

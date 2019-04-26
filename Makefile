@@ -47,4 +47,3 @@ deploy:
 
 validate-circleci:
 	circleci config validate
-	--region us-west-2

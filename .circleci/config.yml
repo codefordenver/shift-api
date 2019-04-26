@@ -1,0 +1,37 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11
+    environment:
+      GO111MODULE: "on"
+      GOPATH: "/home/circleci/go"
+      USER: circleci
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      LC_CTYPE: en_US.UTF-8
+    working_directory: ~/go/src/github.com/codefordenver
+    steps:
+      - checkout
+      - run: sudo apt-get install build-essential
+      - run: make deps
+      - run: sudo apt install curl
+      - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+      - run: sudo python get-pip.py
+      - run: sudo apt-get install libffi-dev libssl-dev libpython2.7-dev
+      - run: git clone git@github.com:awslabs/aws-sam-cli.git
+      - run: pip install --user -e aws-sam-cli/.
+      - run: git clone git@github.com:aws/aws-cli.git
+      - run: pip install --user -e aws-cli/.
+      - run: echo 'export PATH=$PATH:$(python -m site --user-base)/bin' >> $BASH_ENV
+      - run: make package deploy
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
