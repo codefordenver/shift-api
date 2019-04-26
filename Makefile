@@ -7,11 +7,13 @@ deps:
 .PHONY: clean
 clean:
 	rm -rf ./api/api
+	rm -rf ./census_acs5/census_acs5
 	rm -rf ./geography/geography
 
 .PHONY: build
 build:
 	GOOS=linux GOARCH=amd64 go build -o api/api ./api
+	GOOS=linux GOARCH=amd64 go build -o census_acs5/census_acs5 ./census_acs5
 	GOOS=linux GOARCH=amd64 go build -o geography/geography ./geography
 
 .PHONY: local
@@ -25,7 +27,8 @@ dev:
 .PHONY: test
 test:
 	go test -v ./api
-	go test -v ./geography
+	go test -v ./census_acs5
+	go test -v ./goegraphy
 
 .PHONY: package
 package:
@@ -40,7 +43,7 @@ deploy:
         --template-file packaged.yaml \
         --stack-name shift-api-serverless-app-stack \
         --capabilities CAPABILITY_IAM \
-        --region us-east-2
+        --region us-west-2
 
 validate-circleci:
 	circleci config validate

@@ -22,5 +22,6 @@ vendor
 
 .env
 api/api
+census_acs5/census_acs5
 geography/geography
 config.json
